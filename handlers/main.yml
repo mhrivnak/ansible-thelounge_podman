@@ -1,0 +1,9 @@
+- name: reload systemctl container
+  shell: |
+    sudo -u thelounge -- bash -c 'XDG_RUNTIME_DIR=/run/user/{{ getent_passwd.thelounge[1] }} systemctl --user daemon-reload'
+    sudo -u thelounge -- bash -c 'XDG_RUNTIME_DIR=/run/user/{{ getent_passwd.thelounge[1] }} systemctl --user restart thelounge'
+
+- name: reload systemctl volume
+  shell: |
+    sudo -u thelounge -- bash -c 'XDG_RUNTIME_DIR=/run/user/{{ getent_passwd.thelounge[1] }} systemctl --user daemon-reload'
+    sudo -u thelounge -- bash -c 'XDG_RUNTIME_DIR=/run/user/{{ getent_passwd.thelounge[1] }} systemctl --user restart thelounge-volume'

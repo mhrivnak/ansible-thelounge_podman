@@ -1,0 +1,18 @@
+galaxy_info:
+  role_name: thelounge_podman
+  author: Michael Hrivnak
+  description: deploys The Lounge IRC web app using podman and systemd
+  license: GPL-3.0-only
+  min_ansible_version: 2.14.2
+
+  platforms:
+  - name: EL
+    versions:
+    - 9
+
+  galaxy_tags:
+  - irc
+  - thelounge
+  - podman
+
+dependencies: []

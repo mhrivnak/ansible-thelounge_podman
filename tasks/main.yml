@@ -1,0 +1,74 @@
+- name: Install podman
+  ansible.builtin.dnf:
+    name: podman
+    state: installed
+
+- name: Enable systemd to manage containers
+  seboolean:
+    name: container_manage_cgroup
+    state: true
+    persistent: true
+
+- name: Ensure user thelounge exists
+  ansible.builtin.user:
+    name: thelounge
+    comment: thelounge
+    home: /var/lib/thelounge
+    system: true
+    state: present
+
+# used to run systemctl --user commands
+- name: get thelounge uid
+  getent:
+    database: passwd
+    key: thelounge
+
+# Ansible's user module doesn't support adding subuid/subgid for system users. :(
+# https://github.com/ansible/ansible/issues/80988
+# So we use this instead: https://github.com/rwxd/ansible-role-subuid_subgid
+#
+# The adduser command has a new flag that could be useful:
+#   -F, --add-subids-for-system   add entries to sub[ud]id even when adding a system user
+#
+# ... but that option is not available in CentOS Stream 9 at this time.
+- name: prepare subuid_subgid role
+  set_fact:
+    subid_users:
+      - thelounge
+
+- name: Generate subuids & subgids
+  include_role:
+    name: subuid_subgid
+
+- name: Check if user is lingering
+  ansible.builtin.stat:
+    path: "/var/lib/systemd/linger/thelounge"
+  register: user_lingering
+
+# required so the service runs on boot
+- name: Enable systemd lingering if needed
+  ansible.builtin.command: "loginctl enable-linger thelounge"
+  when:
+    - not user_lingering.stat.exists
+
+- name: Ensure systemd user directory exists
+  file:
+    path: /var/lib/thelounge/.config/containers/systemd
+    state: directory
+    owner: thelounge
+    group: thelounge
+    mode: "0755"
+
+- name: Ensure systemd volume file exists
+  copy:
+    src: thelounge.volume
+    dest: /var/lib/thelounge/.config/containers/systemd/thelounge.volume
+  notify:
+    - reload systemctl volume
+
+- name: Ensure systemd container file exists
+  template:
+    src: thelounge.container.j2
+    dest: /var/lib/thelounge/.config/containers/systemd/thelounge.container
+  notify:
+    - reload systemctl container

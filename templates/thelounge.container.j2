@@ -1,0 +1,15 @@
+[Unit]
+Description=The Lounge
+
+[Container]
+Image=ghcr.io/thelounge/thelounge:latest
+Label=app=thelounge
+Label=io.containers.autoupdate=registry
+PublishPort=127.0.0.1:9000:{{ thelounge_port }}
+Volume=thelounge.volume:/var/opt/thelounge
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
