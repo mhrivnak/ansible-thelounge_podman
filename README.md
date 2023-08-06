@@ -8,6 +8,16 @@ You can separately deploy a reverse proxy to expose The Lounge as an external
 service. This role only makes it available on localhost. See
 https://github.com/mhrivnak/ansible-thelounge_nginx as an option.
 
+Add Users
+---------
+
+Login to the host system and run the following command, which will exec into the
+running container to add the user.
+
+```
+sudo -u thelounge -- bash -c 'cd && podman exec -it --user node systemd-thelounge thelounge add alice'
+```
+
 Requirements
 ------------
 
